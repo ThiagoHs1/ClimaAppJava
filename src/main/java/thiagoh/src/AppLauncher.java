@@ -7,7 +7,12 @@ public class AppLauncher {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new ClimaAppGUI().setVisible(true);
+                // display our weather app gui
+
+                // System.out.println(WeatherApp.getLocationData("Tokyo"));
+
+                System.out.println(WeatherApp.getCurrentTime());
+
             }
         });
     }

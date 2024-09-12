@@ -1,95 +1,139 @@
 package thiagoh.src;
 
+import org.json.simple.JSONObject;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
 public class ClimaAppGUI extends JFrame {
+    private JSONObject weatherData;
 
     public ClimaAppGUI() {
-        // Config do GUI
-        super("Clima");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        super("ClimaApp");
+
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+
         setSize(450, 650);
-        setLayout(null);
+
         setLocationRelativeTo(null);
+
+        setLayout(null);
+
         setResizable(false);
 
-        AdicionarGuiElementos();
-
+        addGuiComponents();
     }
 
-    private void AdicionarGuiElementos() {
-        // Config dos elementos do gui
-        JTextField sField = new JTextField();
-        sField.setBounds(15, 15, 351, 25);
-        add(sField);
+    private void addGuiComponents() {
+        JTextField searchTextField = new JTextField();
 
-        sField.setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 16));
-        add(sField);
+        searchTextField.setBounds(15, 15, 351, 45);
 
-        JButton BuscarBotao = new JButton(loadImage("src\\main\\java\\thiagoh\\src\\assets\\search.png"));
-        BuscarBotao.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        BuscarBotao.setBounds(375, 13, 47, 45);
-        add(BuscarBotao);
+        searchTextField.setFont(new Font("Dialog", Font.PLAIN, 24));
 
-        // imagem de clima
-        JLabel climaLabel = new JLabel(loadImage("src\\main\\java\\thiagoh\\src\\assets\\cloudy.png"));
-        climaLabel.setBounds(0, 125, 450, 217);
-        add(climaLabel);
+        add(searchTextField);
 
-        // temperatura
-        JLabel temperaturaTexto = new JLabel("10 C");
-        temperaturaTexto.setBounds(0, 350, 450, 54);
-        temperaturaTexto.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 33));
-        temperaturaTexto.setHorizontalAlignment(SwingConstants.CENTER);
-        add(temperaturaTexto);
+        JLabel weatherConditionImage = new JLabel(loadImage("src\\main\\java\\thiagoh\\src\\assets\\cloudy.png"));
+        weatherConditionImage.setBounds(0, 125, 450, 217);
+        add(weatherConditionImage);
 
-        // Codição do clima
-        JLabel condicaoTexto = new JLabel("Nublado");
-        condicaoTexto.setBounds(0, 405, 450, 30);
-        condicaoTexto.setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 28));
-        condicaoTexto.setHorizontalAlignment(SwingConstants.CENTER);
-        add(condicaoTexto);
+        JLabel temperatureText = new JLabel("10 C");
+        temperatureText.setBounds(0, 350, 450, 54);
+        temperatureText.setFont(new Font("Dialog", Font.BOLD, 48));
 
-        // Umidade
-        JLabel umidadeImagem = new JLabel(loadImage("src\\main\\java\\thiagoh\\src\\assets\\humidity.png"));
-        umidadeImagem.setBounds(15, 500, 75, 66);
-        add(umidadeImagem);
+        temperatureText.setHorizontalAlignment(SwingConstants.CENTER);
+        add(temperatureText);
 
-        JLabel umidadeTexto = new JLabel("<html> <b>Umidade </b>  100%  </html> ");
-        umidadeTexto.setBounds(95, 500, 80, 55);
-        umidadeTexto.setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 16));
-        add(umidadeTexto);
+        JLabel weatherConditionDesc = new JLabel("Nublado");
+        weatherConditionDesc.setBounds(0, 405, 450, 36);
+        weatherConditionDesc.setFont(new Font("Dialog", Font.PLAIN, 32));
+        weatherConditionDesc.setHorizontalAlignment(SwingConstants.CENTER);
+        add(weatherConditionDesc);
 
-        // vento
+        JLabel humidityImage = new JLabel(loadImage("src\\main\\java\\thiagoh\\src\\assets\\humidity.png"));
+        humidityImage.setBounds(15, 500, 74, 66);
+        add(humidityImage);
 
-        JLabel ventoImagem = new JLabel(loadImage("src\\main\\java\\thiagoh\\src\\assets\\windspeed.png"));
-        ventoImagem.setBounds(220, 500, 75, 66);
-        add(ventoImagem);
+        JLabel humidityText = new JLabel("<html><b>Umidade</b> 100%</html>");
+        humidityText.setBounds(90, 500, 85, 55);
+        humidityText.setFont(new Font("Dialog", Font.PLAIN, 16));
+        add(humidityText);
 
-        JLabel ventoTexto = new JLabel("<html> <b>Velocidade do vento </b>  20km  </html> ");
-        ventoTexto.setBounds(300, 500, 85, 55);
-        ventoTexto.setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 16));
-        add(ventoTexto);
+        JLabel windspeedImage = new JLabel(loadImage("src\\main\\java\\thiagoh\\src\\assets\\windspeed.png"));
+        windspeedImage.setBounds(220, 500, 74, 66);
+        add(windspeedImage);
 
+        JLabel windspeedText = new JLabel("<html><b>Velocidade do vento</b> 15km/h</html>");
+        windspeedText.setBounds(310, 500, 85, 55);
+        windspeedText.setFont(new Font("Dialog", Font.PLAIN, 16));
+        add(windspeedText);
+
+        JButton searchButton = new JButton(loadImage("src\\main\\java\\thiagoh\\src\\assets\\search.png"));
+
+        searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        searchButton.setBounds(375, 13, 47, 45);
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                String userInput = searchTextField.getText();
+
+                if (userInput.replaceAll("\\s", "").length() <= 0) {
+                    return;
+                }
+
+                weatherData = WeatherApp.getWeatherData(userInput);
+
+                String weatherCondition = (String) weatherData.get("weather_condition");
+
+                switch (weatherCondition) {
+                    case "Ensolarado":
+                        weatherConditionImage.setIcon(loadImage("src\\main\\java\\thiagoh\\src\\assets\\clear.png"));
+                        break;
+                    case "Nublado":
+                        weatherConditionImage.setIcon(loadImage("src\\main\\java\\thiagoh\\src\\assets\\cloudy.png"));
+                        break;
+                    case "Chuva":
+                        weatherConditionImage.setIcon(loadImage("src\\main\\java\\thiagoh\\src\\assets\\rain.png"));
+                        break;
+                    case "Neve":
+                        weatherConditionImage.setIcon(loadImage("src\\main\\java\\thiagoh\\src\\assets\\snow.png"));
+                        break;
+                }
+
+                double temperature = (double) weatherData.get("temperature");
+                temperatureText.setText(temperature + " C");
+
+                weatherConditionDesc.setText(weatherCondition);
+
+                long humidity = (long) weatherData.get("humidity");
+                humidityText.setText("<html><b>Umidade</b> " + humidity + "%</html>");
+
+                double windspeed = (double) weatherData.get("windspeed");
+                windspeedText.setText("<html><b>Velocidade do vento</b> " + windspeed + "km/h</html>");
+            }
+        });
+        add(searchButton);
     }
 
-    private ImageIcon loadImage(String path) {
+    private ImageIcon loadImage(String resourcePath) {
         try {
-            // read the image file from the path given
-            BufferedImage image = ImageIO.read(new File(path));
 
-            // returns an image icon so that our component can render it
+            BufferedImage image = ImageIO.read(new File(resourcePath));
+
             return new ImageIcon(image);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        System.out.println("Could not find resource");
+        System.out.println("Nada foi encontrado");
         return null;
     }
 }

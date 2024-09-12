@@ -66,6 +66,7 @@ public class WeatherApp {
             JSONArray windspeedData = (JSONArray) hourly.get("windspeed_10m");
             double windspeed = (double) windspeedData.get(index);
 
+            // dados que acessa o front
             JSONObject weatherData = new JSONObject();
             weatherData.put("temperature", temperature);
             weatherData.put("weather_condition", weatherCondition);
@@ -168,17 +169,17 @@ public class WeatherApp {
         String weatherCondition = "";
         if (weathercode == 0L) {
 
-            weatherCondition = "Clear";
+            weatherCondition = "Ensolarado";
         } else if (weathercode > 0L && weathercode <= 3L) {
 
-            weatherCondition = "Cloudy";
+            weatherCondition = "Nublado";
         } else if ((weathercode >= 51L && weathercode <= 67L)
                 || (weathercode >= 80L && weathercode <= 99L)) {
 
-            weatherCondition = "Rain";
+            weatherCondition = "Chuva";
         } else if (weathercode >= 71L && weathercode <= 77L) {
 
-            weatherCondition = "Snow";
+            weatherCondition = "Neve";
         }
 
         return weatherCondition;
